@@ -19,8 +19,16 @@ namespace StreamCompaction {
          */
         void scan(int n, int *odata, const int *idata) {
             timer().startCpuTimer();
-            // TODO
+            scan_impl(n, odata, idata);
             timer().endCpuTimer();
+        }
+
+        void scan_impl(int n, int* odata, const int* idata) {
+            int sum = 0;
+            for (int i = 0; i < n; i++) {
+                odata[i] = sum;
+                sum += idata[i];
+            }
         }
 
         /**
@@ -30,9 +38,15 @@ namespace StreamCompaction {
          */
         int compactWithoutScan(int n, int *odata, const int *idata) {
             timer().startCpuTimer();
-            // TODO
+            int idx = 0;
+            for (int i = 0; i < n; i++) {
+                if (idata[i] != 0) {
+                    odata[idx] = idata[i];
+                    idx++;
+                }
+            }
             timer().endCpuTimer();
-            return -1;
+            return idx;
         }
 
         /**
@@ -41,10 +55,29 @@ namespace StreamCompaction {
          * @returns the number of elements remaining after compaction.
          */
         int compactWithScan(int n, int *odata, const int *idata) {
+            int* is_not_zero = new int[n];
+            int* scan_is_not_zero = new int[n];
             timer().startCpuTimer();
-            // TODO
+
+            for (int i = 0; i < n; i++) {
+                is_not_zero[i] = (idata[i] != 0 ? 1 : 0);
+            }
+            scan_impl(n, scan_is_not_zero, is_not_zero);
+
+            for (int i = 0; i < n-1; i++) {
+                if (scan_is_not_zero[i]!= scan_is_not_zero[i+1]) {
+					odata[scan_is_not_zero[i]] = idata[i];
+				}
+            }
+
+            if(is_not_zero[n-1] == 1) {
+                odata[scan_is_not_zero[n-1]] = idata[n-1];
+            }
+            int count = scan_is_not_zero[n - 1];
             timer().endCpuTimer();
-            return -1;
+            delete[] is_not_zero;
+            delete[] scan_is_not_zero;
+            return count;
         }
     }
 }
