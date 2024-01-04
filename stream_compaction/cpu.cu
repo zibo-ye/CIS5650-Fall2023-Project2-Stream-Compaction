@@ -64,15 +64,12 @@ namespace StreamCompaction {
             }
             scan_impl(n, scan_is_not_zero, is_not_zero);
 
-            for (int i = 0; i < n-1; i++) {
-                if (scan_is_not_zero[i]!= scan_is_not_zero[i+1]) {
+            for (int i = 0; i < n; i++) {
+                if (idata[i] != 0) {
 					odata[scan_is_not_zero[i]] = idata[i];
 				}
             }
 
-            if(is_not_zero[n-1] == 1) {
-                odata[scan_is_not_zero[n-1]] = idata[n-1];
-            }
             int count = scan_is_not_zero[n - 1];
             timer().endCpuTimer();
             delete[] is_not_zero;
